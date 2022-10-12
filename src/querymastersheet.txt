@@ -1,0 +1,26 @@
+dbrouter mapping:
+SELECT * FROM dbrouter.map_account_datasource_config WHERE account_id = $account_id AND fk_datasource_id IN (SELECT pk_datasource_id FROM dbrouter.lu_datasource WHERE fk_datasource_type_id = (SELECT pk_datasource_type_id FROM dbrouter.lu_datasource_type WHERE name = 'SNOWFLAKE') AND deleted = 0) AND deleted = 0;
+Snowflake IRstaging datasource:
+SELECT * FROM dbrouter.map_account_datasource_config WHERE account_id = $account_id AND fk_datasource_id IN (SELECT pk_datasource_id FROM dbrouter.lu_datasource WHERE fk_datasource_type_id = (SELECT pk_datasource_type_id FROM dbrouter.lu_datasource_type WHERE name = 'SNOWFLAKE_IR_STAGING') AND deleted = 0 ) AND deleted = 0;
+Product list in that account:
+SELECT * FROM $schema.map_account_product WHERE fk_account_id=$account_id
+RAM agent:
+SELECT * FROM $schema.scheduled_agent WHERE agent_number = 5104 AND processor = 'AnalyticsRamAgentProcessor';
+Polling Agent:
+SELECT * FROM $schema.scheduled_agent WHERE agent_number = 5104 AND config LIKE '%AnalyticsSnowflakeStagingJobPollingAgent%'
+Global Currency (adh):
+SELECT DISTINCT(global_currency) FROM $schema.acct_doc_header WHERE account_id=$account_id;
+Global Currency (cdh):
+SELECT DISTINCT(global_currency) FROM $schema.cms_doc_header WHERE fk_account_id=$account_id;
+ECI mapping:
+SELECT * FROM $schema.eci_agent_actual_unique_keys WHERE fk_account_id=$account_id;
+to check Duplicate values: 
+SELECT COUNT(*) AS a,account_customer_number,company_code FROM $schema.map_customer_account_rad WHERE fk_account_id = $account_id GROUP BY account_customer_number_norm,company_code ORDER BY a DESC;
+Analytics_Constants configuration:
+SELECT * FROM water.analytics_constants WHERE account_id=$account_id;
+Dimflex configuration:
+SELECT * FROM water.dim_flex_fields WHERE account_id=$account_id;
+All Role_ids:
+SELECT DISTINCT(fk_role_id) FROM analytics.map_chart_role WHERE fk_account_id=$account_id;
+last_accessed from chart_access_history:
+SELECT MAX(chart_access_history.update_time), fk_chart_id FROM analytics.chart_access_history JOIN analytics.chart ON fk_chart_id=pk_chart_id WHERE fk_account_id=$account_id AND fk_product_id=$product_id AND chart_access_history.create_user NOT LIKE "%highradius%" GROUP BY fk_chart_id;
